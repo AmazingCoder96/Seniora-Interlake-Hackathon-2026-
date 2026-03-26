@@ -132,7 +132,7 @@ export default function App() {
   const trustedServices = [
     { id: 1, name: "Mike's Handyman Setup", type: "Handyman", phone: "555-0123", rating: 4.9 },
     { id: 2, name: "Green Thumb Gardeners", type: "Gardener", phone: "555-0456", rating: 4.8 },
-    { id: 3, name: "FreshDrop Groceries", type: "Delivery", phone: "555-0789", rating: 4.9 }
+    { id: 3, name: "FreshDrop Groceries", type: "Delivery", phone: "555-0789", rating: 4.6 }
   ];
 
   // Mock Trend Data
@@ -923,7 +923,7 @@ export default function App() {
                   </label>
                   <input 
                     type="range" 
-                    min="50" max="200" step="10"
+                    min="50" max="150" step="10"
                     value={fontSizeMult} 
                     onChange={e => setFontSizeMult(Number(e.target.value))} 
                     className="w-full h-4 bg-slate-200 rounded-lg appearance-none cursor-pointer mb-2"
