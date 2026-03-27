@@ -7,19 +7,50 @@ import {
   Clock, Tag, ChevronRight, Navigation, Tv, Gamepad2, Play, ExternalLink, Globe, Star, Lightbulb, Utensils, User, Wrench, ShieldCheck, Bell
 } from 'lucide-react';
 
+const STORAGE_KEY = 'elder-app-data-v1';
+
+const DEFAULT_MEDICATIONS = [
+  { id: 1, name: 'Blood Pressure (Lisinopril)', time: '08:00', taken: false, color: 'bg-blue-100 border-blue-400' },
+  { id: 2, name: 'Joint Pain (Ibuprofen)', time: '13:00', taken: false, color: 'bg-orange-100 border-orange-400' },
+  { id: 3, name: 'Heart (Aspirin)', time: '18:00', taken: false, color: 'bg-red-100 border-red-400' }
+];
+
+const DEFAULT_CONTACTS = [
+  { id: 1, name: 'Sarah (Daughter)', phone: '5550192' },
+  { id: 2, name: 'Dr. Smith', phone: '5550198' },
+];
+
+const loadSavedState = () => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch (error) {
+    console.log('Saved data could not be loaded.');
+    return null;
+  }
+};
+
 export default function App() {
+  const [savedState] = useState(() => loadSavedState());
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [mood, setMood] = useState(null);
+  const [mood, setMood] = useState(savedState?.mood ?? null);
   const [sosActive, setSosActive] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
 
   // User Preferences
-  const [userName, setUserName] = useState('Arthur');
-  const [fontSizeMult, setFontSizeMult] = useState(100);
+  const [userName, setUserName] = useState(savedState?.userName || 'Arthur');
+  const [fontSizeMult, setFontSizeMult] = useState(savedState?.fontSizeMult || 100);
 
   // Custom Theme Preferences
-  const [customMain, setCustomMain] = useState('#0f172a');
-  const [customSec, setCustomSec] = useState('#f8fafc');
+  const [customMain, setCustomMain] = useState(savedState?.customMain || '#0f172a');
+  const [customSec, setCustomSec] = useState(savedState?.customSec || '#f8fafc');
 
   // Modal & Detail States
   const [isAddingPill, setIsAddingPill] = useState(false);
@@ -40,6 +71,24 @@ export default function App() {
     document.documentElement.style.fontSize = `${fontSizeMult}%`;
     return () => { document.documentElement.style.fontSize = ''; };
   }, [fontSizeMult]);
+
+  // Persist user-entered data for GitHub Pages/static hosting.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const persistedData = {
+      userName,
+      fontSizeMult,
+      customMain,
+      customSec,
+      themeMode,
+      mood,
+      medications,
+      contacts,
+    };
+
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(persistedData));
+  }, [userName, fontSizeMult, customMain, customSec, themeMode, mood, medications, contacts]);
 
   // Global Haptic Feedback
   useEffect(() => {
@@ -107,7 +156,7 @@ export default function App() {
   const [score, setScore] = useState(0);
 
   // Accessibility State
-  const [themeMode, setThemeMode] = useState('default');
+  const [themeMode, setThemeMode] = useState(savedState?.themeMode || 'default');
 
   // Form States
   const [newPillName, setNewPillName] = useState('');
@@ -117,16 +166,9 @@ export default function App() {
   const [chatMessage, setChatMessage] = useState('');
 
   // Mock Data
-  const [medications, setMedications] = useState([
-    { id: 1, name: 'Blood Pressure (Lisinopril)', time: '08:00', taken: false, color: 'bg-blue-100 border-blue-400' },
-    { id: 2, name: 'Joint Pain (Ibuprofen)', time: '13:00', taken: false, color: 'bg-orange-100 border-orange-400' },
-    { id: 3, name: 'Heart (Aspirin)', time: '18:00', taken: false, color: 'bg-red-100 border-red-400' }
-  ]);
+  const [medications, setMedications] = useState(savedState?.medications || DEFAULT_MEDICATIONS);
 
-  const [contacts, setContacts] = useState([
-    { id: 1, name: 'Sarah (Daughter)', phone: '5550192', icon: <Phone className="w-8 h-8" aria-hidden="true" /> },
-    { id: 2, name: 'Dr. Smith', phone: '5550198', icon: <Phone className="w-8 h-8" aria-hidden="true" /> },
-  ]);
+  const [contacts, setContacts] = useState(savedState?.contacts || DEFAULT_CONTACTS);
 
   const [notifications] = useState([
     { id: 1, from: 'Sarah (Daughter)', text: 'Don\'t forget our video call at 3 PM today!', time: '1h ago', read: false },
@@ -290,8 +332,7 @@ export default function App() {
       setContacts([...contacts, { 
         id: Date.now(), 
         name: newContactName, 
-        phone: formattedPhone, 
-        icon: <Phone className="w-8 h-8" aria-hidden="true" /> 
+        phone: formattedPhone
       }]);
       setNewContactName('');
       setNewContactPhone('');
@@ -741,7 +782,9 @@ export default function App() {
                       aria-label={`Call ${contact.name} at ${contact.phone}`}
                       className={`w-full flex items-center p-5 rounded-[2rem] border-4 active:scale-95 transition-all ${themeMode !== 'default' && themeMode !== 'custom' ? 'bg-transparent border-current' : themeMode === 'custom' ? 'theme-custom-border' : 'bg-slate-50 border-slate-200 text-slate-900'}`}
                     >
-                      <div className={`p-4 rounded-2xl mr-5 flex items-center justify-center ${styles.iconContainer}`} aria-hidden="true">{contact.icon}</div>
+                      <div className={`p-4 rounded-2xl mr-5 flex items-center justify-center ${styles.iconContainer}`} aria-hidden="true">
+                        <Phone className="w-8 h-8" aria-hidden="true" />
+                      </div>
                       <div className="text-left flex-1">
                         <h3 className="text-2xl font-black mb-1">{contact.name}</h3>
                         <p className="text-xl font-bold opacity-70 tracking-widest">{contact.phone}</p>
