@@ -1,4 +1,13 @@
 import React, { useState, useEffect } from 'react';
+// -------- DATA PERSISTENCE HELPER --------
+const loadStored = (key, fallback) => {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : fallback;
+  } catch {
+    return fallback;
+  }
+};
 import { 
   Phone, Pill, Heart, AlertCircle, CheckCircle, Smile, Frown, Meh, 
   X, Plus, UserPlus, Settings, Palette, Image as ImageIcon, Send,
@@ -9,13 +18,15 @@ import {
 
 export default function App() {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [mood, setMood] = useState(null);
+  const [mood, setMood] = useState(() => loadStored("mood", null));
   const [sosActive, setSosActive] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
 
   // User Preferences
-  const [userName, setUserName] = useState('Arthur');
-  const [fontSizeMult, setFontSizeMult] = useState(100);
+  const [userName, setUserName] = useState(() => loadStored("userName", "Arthur"));
+  const [fontSizeMult, setFontSizeMult] = useState(() => loadStored("fontSizeMult", 100));
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [deleteCountdown, setDeleteCountdown] = useState(3);
 
   // Modal & Detail States
   const [isAddingPill, setIsAddingPill] = useState(false);
@@ -26,6 +37,29 @@ export default function App() {
   const [selectedNews, setSelectedNews] = useState(null);
   const [activeGame, setActiveGame] = useState(null);
 
+  const deleteAllData = () => {
+  localStorage.clear();
+  window.location.reload();
+  };
+
+  useEffect(() => {
+    if (!confirmDeleteOpen) return;
+  
+    setDeleteCountdown(3);
+  
+    const timer = setInterval(() => {
+      setDeleteCountdown((c) => {
+        if (c <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return c - 1;
+      });
+    }, 1000);
+  
+    return () => clearInterval(timer);
+  }, [confirmDeleteOpen]);
+    
   // Scroll to top on tab change
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -105,7 +139,7 @@ export default function App() {
   const [score, setScore] = useState(0);
 
   // Accessibility State
-  const [themeMode, setThemeMode] = useState('default');
+  const [themeMode, setThemeMode] = useState(() => loadStored("themeMode", "default"));
 
   // Form States
   const [newPillName, setNewPillName] = useState('');
@@ -115,16 +149,16 @@ export default function App() {
   const [chatMessage, setChatMessage] = useState('');
 
   // Mock Data
-  const [medications, setMedications] = useState([
+  const [medications, setMedications] = useState(() => loadStored("medications", [
     { id: 1, name: 'Blood Pressure (Lisinopril)', time: '08:00', taken: false, color: 'bg-blue-100 border-blue-400' },
     { id: 2, name: 'Joint Pain (Ibuprofen)', time: '13:00', taken: false, color: 'bg-orange-100 border-orange-400' },
     { id: 3, name: 'Heart (Aspirin)', time: '18:00', taken: false, color: 'bg-red-100 border-red-400' }
-  ]);
+  ]));
 
-  const [contacts, setContacts] = useState([
+  const [contacts, setContacts] = useState(() => loadStored("contacts", [
     { id: 1, name: 'Sarah (Daughter)', phone: '5550192', icon: <Phone className="w-8 h-8" /> },
     { id: 2, name: 'Dr. Smith', phone: '5550198', icon: <Phone className="w-8 h-8" /> },
-  ]);
+  ]));
 
   const [notifications] = useState([
     { id: 1, from: 'Sarah (Daughter)', text: 'Don\'t forget our video call at 3 PM today!', time: '1h ago', read: false },
@@ -348,6 +382,31 @@ export default function App() {
         };
     }
   };
+
+  // -------- AUTO SAVE USER DATA --------
+useEffect(() => {
+  localStorage.setItem("mood", JSON.stringify(mood));
+}, [mood]);
+
+useEffect(() => {
+  localStorage.setItem("userName", JSON.stringify(userName));
+}, [userName]);
+
+useEffect(() => {
+  localStorage.setItem("fontSizeMult", JSON.stringify(fontSizeMult));
+}, [fontSizeMult]);
+
+useEffect(() => {
+  localStorage.setItem("themeMode", JSON.stringify(themeMode));
+}, [themeMode]);
+
+useEffect(() => {
+  localStorage.setItem("medications", JSON.stringify(medications));
+}, [medications]);
+
+useEffect(() => {
+  localStorage.setItem("contacts", JSON.stringify(contacts));
+}, [contacts]);
 
   const styles = getThemeStyles();
   const greeting = getGreeting();
@@ -950,6 +1009,8 @@ export default function App() {
                 </div>
                 
                 <button onClick={() => setIsSettingsOpen(false)} className={`w-full text-3xl font-black py-6 rounded-[2rem] mt-4 shadow-md ${styles.saveBtn}`}>Done</button>
+
+                <button onClick={() => setConfirmDeleteOpen(true)} className="w-full mt-6 p-4 rounded-2xl font-black text-xl bg-red-600 text-white active:scale-95">Delete All Data</button>
               </div>
             </div>
           </div>
@@ -1026,6 +1087,44 @@ export default function App() {
           </div>
         )}
 
+        {confirmDeleteOpen && (
+          <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-[2rem] p-8 max-w-md w-full text-center">
+              
+              <h2 className="text-3xl font-black mb-4">Delete All Data?</h2>
+        
+              <p className="text-lg font-bold opacity-70 mb-6">
+                This permanently deletes everything.
+              </p>
+        
+              <div className="flex gap-4">
+                
+                <button
+                  onClick={() => setConfirmDeleteOpen(false)}
+                  className="flex-1 p-4 rounded-2xl font-black text-xl bg-gray-200"
+                >
+                  Cancel
+                </button>
+        
+                <button
+                  disabled={deleteCountdown > 0}
+                  onClick={deleteAllData}
+                  className={`flex-1 p-4 rounded-2xl font-black text-xl ${
+                    deleteCountdown > 0
+                      ? "bg-gray-400 text-gray-700"
+                      : "bg-red-600 text-white"
+                  }`}
+                >
+                  {deleteCountdown > 0
+                    ? `Delete (${deleteCountdown})`
+                    : "Delete"}
+                </button>
+        
+              </div>
+            </div>
+          </div>
+        )}
+      
       </div>
     </div>
   );
