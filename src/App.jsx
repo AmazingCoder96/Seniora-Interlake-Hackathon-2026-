@@ -1181,7 +1181,7 @@ export default function App() {
                   <input 
                     id="settings-fontsize-slider"
                     type="range" 
-                    min="50" max="200" step="10"
+                    min="50" max="150" step="10"
                     value={fontSizeMult} 
                     onChange={e => setFontSizeMult(Number(e.target.value))} 
                     aria-label="Adjust global text size slider"
