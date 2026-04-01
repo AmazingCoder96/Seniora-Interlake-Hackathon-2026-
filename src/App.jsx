@@ -242,7 +242,7 @@ export default function App() {
 
   const trustedServices = [
     { id: 1, name: "Mike's Handyman Setup", type: "Handyman", phone: "555-0123", rating: 4.9 },
-    { id: 2, name: "Green Thumb Gardeners", type: "Gardener", phone: "555-0456", rating: 4.8 },
+    { id: 2, name: "Green Wheel Drivers", type: "Transport", phone: "555-0456", rating: 4.6 },
     { id: 3, name: "FreshDrop Groceries", type: "Delivery", phone: "555-0789", rating: 4.9 }
   ];
 
