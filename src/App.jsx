@@ -115,7 +115,7 @@ export default function App() {
         // ----- TXT (25%) -----
         try {
   
-          const txtRes = await fetch("/Stories.txt");
+          const txtRes = await fetch("https://raw.githubusercontent.com/AmazingCoder96/InterlakeHackathon2026/refs/heads/main/Stories.txt");
   
           if (!txtRes.ok) throw new Error("stories.txt missing");
   
