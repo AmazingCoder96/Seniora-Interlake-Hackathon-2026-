@@ -260,6 +260,18 @@ export default function App() {
     { day: '3d ago', val: 7.2 }, { day: '2d ago', val: 6.8 }, { day: 'Yesterday', val: 7.5 }, { day: 'Today', val: 7.2 }
   ];
 
+  const elderExercises = [
+    { name: 'Chair Marching', detail: 'Sit tall and gently lift one knee at a time for 1 to 2 minutes.' },
+    { name: 'Wall Push-Ups', detail: 'Stand arm-length from a wall and do 8 to 12 slow push-ups.' },
+    { name: 'Ankle Circles', detail: 'Lift one foot slightly and make 10 circles in each direction, then switch.' },
+    { name: 'Seated Side Stretch', detail: 'Raise one arm overhead and lean gently to each side for 15 seconds.' },
+    { name: 'Heel-to-Toe Balance', detail: 'Hold a chair and place one foot in front of the other for 20 seconds.' }
+  ];
+  
+  const [selectedExercise, setSelectedExercise] = useState(
+    () => elderExercises[Math.floor(Math.random() * elderExercises.length)]
+  );
+  
   const newsArticles = [
     { 
       id: 1, 
@@ -645,8 +657,29 @@ export default function App() {
                   <span className="text-xl font-black">7h 12m</span>
                   <span className="text-sm font-bold opacity-60">Sleep</span>
                 </div>
-              </div>
+            </div>
 
+            <section className={`${styles.card} rounded-[2.5rem] p-6 transition-all`} aria-label="Daily easy exercise recommendation">
+                <div className="flex items-center justify-between gap-4 mb-4">
+                  <h2 className="text-2xl font-black flex items-center gap-2">
+                    <Lightbulb className="w-6 h-6" aria-hidden="true" />
+                    Easy Exercise
+                  </h2>
+                  <button
+                    onClick={() => setSelectedExercise(elderExercises[Math.floor(Math.random() * elderExercises.length)])}
+                    aria-label="Show another easy exercise"
+                    className={`px-4 py-2 rounded-2xl border-2 font-bold active:scale-95 transition-all ${themeMode !== 'default' ? 'border-current bg-transparent' : 'border-slate-200 bg-slate-100 text-slate-800'}`}
+                  >
+                    New one
+                  </button>
+                </div>
+                <div className={`p-5 rounded-[2rem] border-4 ${themeMode !== 'default' ? 'border-current bg-transparent' : 'border-emerald-200 bg-emerald-50 text-slate-900'}`}>
+                  <h3 className="text-2xl font-black mb-2">{selectedExercise.name}</h3>
+                  <p className="text-lg font-bold opacity-80 leading-relaxed">{selectedExercise.detail}</p>
+                </div>
+            </section>
+
+              
               {/* Health Trends */}
               <section className={`${styles.card} rounded-[2.5rem] p-6 transition-all`} aria-label="Health Trends Graphs">
                 <h2 className="text-2xl font-black mb-6 flex items-center gap-2"><Activity className="w-6 h-6" aria-hidden="true" /> Health Trends</h2>
