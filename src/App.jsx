@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 
 export default function App() {
+  const appName = 'Seniora';
   const [currentTime, setCurrentTime] = useState(new Date());
   const [mood, setMood] = useState(null);
   const [sosActive, setSosActive] = useState(false);
@@ -542,6 +543,7 @@ export default function App() {
         {/* HEADER */}
         <header className={`${styles.headerBg} px-6 py-8 rounded-b-[3rem] relative transition-all`} aria-label="App Header">
           <div className="flex flex-col items-center text-center">
+            <p className={`text-lg font-black uppercase tracking-[0.2em] opacity-70 mb-2 ${styles.text}`}>{appName}</p>
             <h1 className={`text-6xl font-black tracking-tighter mb-1 leading-none ${styles.text}`} aria-live="polite">{timeString}</h1>
             <p className={`text-2xl font-bold opacity-70 uppercase tracking-wide mb-5 ${styles.text}`}>{dateString}</p>
             
